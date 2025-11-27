@@ -1,0 +1,70 @@
+import redis.clients.jedis.Jedis;
+
+public class  {
+
+    // This method SIMULATES a slow database call
+    private static String getUserFromDatabase(String userId) {
+        System.out.println("... Querying the slow database for user " + userId + "...");
+        try {
+            // Simulate a 2-second network/database delay
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // In a real application, this would be a user object, often serialized as JSON
+        return "{\"name\":\"Alex\", \"email\":\"alex@example.com\", \"userId\":\"" + userId + "\"}";
+    }
+
+    /**
+     * This is the main logic. It tries the cache first before hitting the database.
+     */
+    public static String getUserProfile(String userId) {
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+            String cacheKey = "user:" + userId + ":profile";
+
+            // 1. Try to get the user profile from the Redis cache
+            String cachedProfile = jedis.get(cacheKey);
+
+            if (cachedProfile != null) {
+                // CACHE HIT! The data was found in Redis.
+                System.out.println("CACHE HIT! Found user profile in Redis.");
+                return cachedProfile;
+            } else {
+                // CACHE MISS! The data was not in Redis.
+                System.out.println("CACHE MISS! User profile not found in Redis.");
+
+                // 2. Get the data from the slow database
+                String dbProfile = getUserFromDatabase(userId);
+
+                // 3. Store the fresh data in the cache for next time.
+                // We'll set it to expire in 1 hour (3600 seconds).
+                System.out.println("Storing new data in Redis cache...");
+                jedis.setex(cacheKey, 3600, dbProfile);
+
+                return dbProfile;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        String userId = "123";
+
+        // --- First Request ---
+        // This will be slow because the data isn't in the cache yet.
+        System.out.println("--- Making first request for user " + userId + " ---");
+        long startTime1 = System.currentTimeMillis();
+        String profile1 = getUserProfile(userId);
+        long endTime1 = System.currentTimeMillis();
+        System.out.println("Received: " + profile1);
+        System.out.println("Time taken: " + (endTime1 - startTime1) + "ms\n");
+
+        // --- Second Request ---
+        // This will be extremely fast because it will be a cache hit.
+        System.out.println("--- Making second request for the same user ---");
+        long startTime2 = System.currentTimeMillis();
+        String profile2 = getUserProfile(userId);
+        long endTime2 = System.currentTimeMillis();
+        System.out.println("Received: " + profile2);
+        System.out.println("Time taken: " + (endTime2 - startTime2) + "ms");
+    }
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Weather Globe</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: purple;
+      color: blue;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: table-column-group; /* Removes default canvas margin */
+    }
+    #tooltip {
+      position: absolute;
+      display: none;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.75);
+      border: 1px solid #fff;
+      border-radius: 5px;
+      pointer-events: none; /* Allows mouse events to pass through to the canvas */
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div id="tooltip"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/controls/OrbitControls.js"></script>
+
+<script src="main.js"></script>
+
+</body>
+</html>

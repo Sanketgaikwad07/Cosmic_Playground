@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cosmic_Mode</title>
+    <style>
+        /* Basic CSS to make the canvas fill the entire screen */
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // --- SCENE SETUP ---
+
+    // 1. Create a scene to hold all our objects, cameras, and lights.
+    const scene = new THREE.Scene();
+
+    // 2. Set up the camera. It's like a person looking at the scene.
+    // The parameters are: Field of View, Aspect Ratio, Near Clipping Plane, Far Clipping Plane.
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    // 3. Create the renderer. It renders the scene on the screen.
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // --- LIGHTING ---
+
+    // 4. Add some lights to the scene so we can actually see the objects.
+    // Ambient light illuminates all objects equally, giving a general brightness.
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    // Point light acts like a light bulb, casting light from a single point.
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
+
+    // --- GEOMETRIES AND OBJECTS ---
+
+    // 5. Create the cube geometry and material (your original cube).
+    const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
+    // Use a Phong material to react to the new lights.
+    const cubeMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    scene.add(cube);
+
+    // 6. Create a second object, a sphere, with a different material.
+    const sphereGeometry = new THREE.SphereGeometry(0.75, 32, 32);
+    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    // Position the sphere next to the cube.
+    sphere.position.x = 2;
+    scene.add(sphere);
+
+    // 7. Create a ground plane.
+    const planeGeometry = new THREE.PlaneGeometry(20, 20);
+    const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    // Rotate the plane to be flat on the ground.
+    plane.rotation.x = -Math.PI / 2;
+    plane.position.y = -2;
+    scene.add(plane);
+
+    // Position the camera to get a good view of the scene.
+    camera.position.z = 5;
+    camera.position.y = 2;
+
+    // --- ANIMATION LOOP ---
+
+    // 8. Create the animation loop function.
+    // This function will be called on every frame.
+    function animate() {
+        // requestAnimationFrame is the best way to handle animations in browsers.
+        requestAnimationFrame(animate);
+
+        // Animate the cube and sphere.
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        sphere.rotation.x += 0.01;
+        sphere.rotation.y -= 0.01;
+
+        // Animate the camera to move in a circle around the center of the scene.
+        const time = Date.now() * 0.0005; // Get a changing value for smooth animation.
+        camera.position.x = Math.cos(time) * 5;
+        camera.position.z = Math.sin(time) * 5;
+        camera.lookAt(0, 0, 0); // Always make the camera look at the center.
+
+        // Render the scene with the updated objects and camera.
+        renderer.render(scene, camera);
+    }
+
+    // 9. Start the animation loop.
+    animate();
+
+
+
+    // 10. Update the camera and renderer size if the window is resized.
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+
+</script>
+</body>
+</html>
